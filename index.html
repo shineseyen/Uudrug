@@ -34,8 +34,14 @@
     display:flex;
     gap:30px;
     align-items:flex-start;
+    
 }
-
+.midBox{
+    display:flex;
+    gap:30px;
+    align-items:flex-start;
+    
+}
 .wallSelect{
     display:flex;
     flex-direction:column;
@@ -72,8 +78,44 @@ input[type=number] {
         <label><input type="checkbox" id="wallC"> Ханын өргөн - 1</label>
         <label><input type="checkbox" id="wallD"> Ханын өргөн - 2</label>
     </div>
-
+    </div>
+    <hr>
+<div class="midBox">
+     <div class="inputs">
+         <label>Хаалганы өргөн:
+            <input type="number" id="doorW" step="0.1">
+         </label>
+         <label>Хаалганы өндөр:
+             <input type="number" id="doorH" step="0.1">
+          </label>
+        <label>Хаалганы тоо:
+              <input type="number" id="doorQty">
+            </label>
+      </div>
+      <div class="inputs">
+       <label>Цонх 1 өргөн:
+                <input type="number" id="win1W" step="0.1">
+       </label>
+        <label>Цонх 1 өндөр:
+                 <input type="number" id="win1H" step="0.1">
+        </label>
+        <label>Цонх 1 тоо:
+                <input type="number" id="win1Qty">
+        </label>
+      </div>
+      <div class="inputs">
+      <label>Цонх 2 өргөн:
+           <input type="number" id="win2W" step="0.1">
+       </label>
+       <label>Цонх 2 өндөр:
+                <input type="number" id="win2H" step="0.1">
+        </label>
+        <label>Цонх 2 тоо:
+                 <input type="number" id="win2Qty">
+           </label>
+      </div>
 </div>
+
 
 <h3>Хананд хийх ( <span style="color:green;">Хавтан</span> )</h3>
 <table class="itemsTable">
@@ -568,6 +610,19 @@ input[type=number] {
 <div class="total" id="totalOutput">Нийт үнэ: 0 ₮</div>
 
 <script>
+
+const doorW = document.getElementById('doorW');
+const doorH = document.getElementById('doorH');
+const doorQty = document.getElementById('doorQty');
+
+const win1W = document.getElementById('win1W');
+const win1H = document.getElementById('win1H');
+const win1Qty = document.getElementById('win1Qty');
+
+const win2W = document.getElementById('win2W');
+const win2H = document.getElementById('win2H');
+const win2Qty = document.getElementById('win2Qty');
+
 const heightInput = document.getElementById('height');
 const widthInput = document.getElementById('width');
 const depthInput = document.getElementById('depth');
@@ -586,13 +641,16 @@ function getNumber(value){
     return parseFloat(value) || 0;
 }
 
-function precomputeRows() {
+function precomputeRows(){
 
     const height = getNumber(heightInput.value);
     const width = getNumber(widthInput.value);
     const depth = getNumber(depthInput.value);
 
-    // Сонгосон хануудын талбай
+    // -----------------
+    // Ханын талбай
+    // -----------------
+
     let wallArea = 0;
 
     if(wallA.checked) wallArea += width * height;
@@ -600,57 +658,96 @@ function precomputeRows() {
     if(wallC.checked) wallArea += depth * height;
     if(wallD.checked) wallArea += depth * height;
 
+    // -----------------
+    // Хаалга цонхны талбай
+    // -----------------
+
+    const doorArea =
+        getNumber(doorW.value) *
+        getNumber(doorH.value) *
+        getNumber(doorQty.value);
+
+    const win1Area =
+        getNumber(win1W.value) *
+        getNumber(win1H.value) *
+        getNumber(win1Qty.value);
+
+    const win2Area =
+        getNumber(win2W.value) *
+        getNumber(win2H.value) *
+        getNumber(win2Qty.value);
+
+    const openArea = doorArea + win1Area + win2Area;
+
+    // хананаас хасна
+    wallArea = wallArea - openArea;
+
+    if(wallArea < 0) wallArea = 0;
+
+    // -----------------
+    // Хаалга цонхны хүрээ
+    // -----------------
+
+    const doorFrame =
+        (getNumber(doorW.value) + getNumber(doorH.value)) * 2 *
+        getNumber(doorQty.value);
+
+    const win1Frame =
+        (getNumber(win1W.value) + getNumber(win1H.value)) * 2 *
+        getNumber(win1Qty.value);
+
+    const win2Frame =
+        (getNumber(win2W.value) + getNumber(win2H.value)) * 2 *
+        getNumber(win2Qty.value);
+
+    const totalFrame = doorFrame + win1Frame + win2Frame;
+
+    // -----------------
+    // Мөрүүдийг бодох
+    // -----------------
+
     precomputedTotals = [];
 
-    tables.forEach((table) => {
+    tables.forEach((table)=>{
 
         const rows = table.querySelectorAll('tbody tr');
 
-        rows.forEach((row) => {
+        rows.forEach((row)=>{
 
             const priceText = row.querySelector('.price').textContent.replace(/[₮,]/g,'');
             const price = getNumber(priceText);
             const size = getNumber(row.querySelector('.size').textContent);
 
-            let qty;
+            let qty = 0;
 
             if(row.dataset.formula === "roof"){
 
-                // Тааз
                 const roofArea = width * depth;
                 qty = size ? Math.ceil(roofArea / size) : 0;
 
             }
             else if(row.dataset.formula === "floor"){
 
-                // Шал
                 const floorArea = width * depth;
                 qty = size ? Math.ceil(floorArea / size) : 0;
 
             }
             else if(row.dataset.formula === "wallpaper"){
 
-    // wallpaper
-    const wallsLength =
-        (wallA.checked ? width : 0) +
-        (wallB.checked ? width : 0) +
-        (wallC.checked ? depth : 0) +
-        (wallD.checked ? depth : 0);
+                const wallsLength =
+                    (wallA.checked ? width : 0) +
+                    (wallB.checked ? width : 0) +
+                    (wallC.checked ? depth : 0) +
+                    (wallD.checked ? depth : 0);
 
-    let divider;
+                let divider = height > 2.5 ? 1.5 : 2;
 
-    if(height > 2.5){
-        divider = 1.5;
-    }else{
-        divider = 2;
-    }
+                qty = Math.ceil(wallsLength / divider);
 
-    qty = Math.ceil(wallsLength / divider);
-
-}
+            }
             else{
 
-                // Хана (сонгосон ханууд)
+                // ханын материал
                 qty = size ? Math.ceil(wallArea / size) : 0;
 
             }
@@ -669,11 +766,11 @@ function precomputeRows() {
     updateTotal();
 }
 
-function updateTotal() {
+function updateTotal(){
 
     let total = 0;
 
-    selectedRows.forEach(index => {
+    selectedRows.forEach(index=>{
         total += precomputedTotals[index] || 0;
     });
 
@@ -681,16 +778,19 @@ function updateTotal() {
         `Нийт үнэ: ${total.toLocaleString()} ₮`;
 }
 
+// -----------------
 // мөр сонгох
+// -----------------
+
 let globalIndex = 0;
 
-tables.forEach((table) => {
+tables.forEach((table)=>{
 
-    table.querySelectorAll('.nameCell').forEach((cell) => {
+    table.querySelectorAll('.nameCell').forEach((cell)=>{
 
         const rowIndex = globalIndex;
 
-        cell.addEventListener('click', () => {
+        cell.addEventListener('click',()=>{
 
             const row = cell.parentElement;
 
@@ -712,18 +812,33 @@ tables.forEach((table) => {
 
 });
 
-// хэмжээ өөрчлөгдөхөд бодно
+// -----------------
+// Input events
+// -----------------
+
 heightInput.addEventListener('input', precomputeRows);
 widthInput.addEventListener('input', precomputeRows);
 depthInput.addEventListener('input', precomputeRows);
 
-// хана сонгоход бодно
 wallA.addEventListener('change', precomputeRows);
 wallB.addEventListener('change', precomputeRows);
 wallC.addEventListener('change', precomputeRows);
 wallD.addEventListener('change', precomputeRows);
 
+doorW.addEventListener('input', precomputeRows);
+doorH.addEventListener('input', precomputeRows);
+doorQty.addEventListener('input', precomputeRows);
+
+win1W.addEventListener('input', precomputeRows);
+win1H.addEventListener('input', precomputeRows);
+win1Qty.addEventListener('input', precomputeRows);
+
+win2W.addEventListener('input', precomputeRows);
+win2H.addEventListener('input', precomputeRows);
+win2Qty.addEventListener('input', precomputeRows);
+
 precomputeRows();
+
 </script>
 
 </body>
