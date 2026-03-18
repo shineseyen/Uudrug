@@ -927,13 +927,18 @@ applyDiscountBtn.addEventListener('click', () => {
     updateTotal();
 });
 function updateTotal(){
-
-
-
     let total = 0;
 
     selectedRows.forEach(index=>{
-        total += precomputedTotals[index] || 0;
+        // precomputedTotals-д row-ийн анхны үнэ
+        let rowTotal = precomputedTotals[index] || 0;
+
+        // Хямдрал идэвхтэй бол 10% хямдруулна
+        if(discountApplied){
+            rowTotal = rowTotal * (1 - discountPercent/100);
+        }
+
+        total += rowTotal;
     });
 
     document.getElementById('totalOutput').textContent =
