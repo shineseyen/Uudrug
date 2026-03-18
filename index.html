@@ -548,7 +548,7 @@ input[type=number] {
         </tr>
     </tbody>
 </table>
-<h3><span style="color:blue";>Бусад материал</span></h3>
+<h3><span style="color:blue";>Наадаг обойн төрөл</span></h3>
 <table class="itemsTable">
     <thead>
          <tr>
@@ -573,7 +573,6 @@ input[type=number] {
             <td class="price">12500₮</td>
             <td class="qty">0</td>
             <td class="rowTotal">0</td>
-        </tr>
         </tr>
             <tr data-formula="wallpaper">
             <td class="nameCell">Обой орос нимгэн</td>
@@ -606,6 +605,50 @@ input[type=number] {
         </tr>
     </tbody>
 </table>
+<h3><span style="color:red";>Бусад дайвар материалууд</span></h3>
+<table class="itemsTable">
+    <thead>
+         <tr>
+            <th>Барааны нэр</th>
+            <th>м</th>
+            <th>Нэгж үнэ</th>
+            <th>Ширхэг</th>
+            <th>Дүн</th>
+        </tr>
+    </thead>
+    <tbody>
+          <tr data-formula="doorframe">
+    <td class="nameCell">Хаалганы хүрээ</td>
+    <td class="size">3</td> <!-- 1 ширхэг материалын урт (метр) -->
+    <td class="price">19000₮</td>
+    <td class="qty">0</td>
+    <td class="rowTotal">0</td>
+</tr>
+
+<tr data-formula="winframe">
+    <td class="nameCell">Сайданг цонхны хүрээ</td>
+    <td class="size">3</td>
+    <td class="price">19000₮</td>
+    <td class="qty">0</td>
+    <td class="rowTotal">0</td>
+</tr>
+<tr data-formula="corner">
+    <td class="nameCell">Сайданг гадны булан</td>
+    <td class="size">3</td>
+    <td class="price">28000₮</td>
+    <td class="qty">0</td>
+    <td class="rowTotal">0</td>
+</tr>
+<tr data-formula="joint">
+    <td class="nameCell">Сайданг залгаa</td>
+    <td class="size">3</td>
+    <td class="price">19000₮</td>
+    <td class="qty">0</td>
+    <td class="rowTotal">0</td>
+</tr>
+    </tbody>
+</table>
+
 
 <div class="total" id="totalOutput">Нийт үнэ: 0 ₮</div>
 
@@ -700,8 +743,6 @@ function precomputeRows(){
         (getNumber(win2W.value) + getNumber(win2H.value)) * 2 *
         getNumber(win2Qty.value);
 
-    const totalFrame = doorFrame + win1Frame + win2Frame;
-
     // -----------------
     // Мөрүүдийг бодох
     // -----------------
@@ -745,6 +786,59 @@ function precomputeRows(){
                 qty = Math.ceil(wallsLength / divider);
 
             }
+            else if(row.dataset.formula === "doorframe"){
+
+    const totalLength =
+        (getNumber(doorW.value) + getNumber(doorH.value)) * 2 *
+        getNumber(doorQty.value);
+
+    qty = size ? Math.ceil(totalLength / size) : 0;
+
+}
+else if(row.dataset.formula === "winframe"){
+
+    const totalLength =
+        ((getNumber(win1W.value) + getNumber(win1H.value)) * 2 * getNumber(win1Qty.value)) +
+        ((getNumber(win2W.value) + getNumber(win2H.value)) * 2 * getNumber(win2Qty.value));
+
+    qty = (size > 0) ? Math.ceil(totalLength / size) : 0;
+
+}
+else if(row.dataset.formula === "corner"){
+
+    let wallCount = 0;
+
+    if(wallA.checked) wallCount++;
+    if(wallB.checked) wallCount++;
+    if(wallC.checked) wallCount++;
+    if(wallD.checked) wallCount++;
+
+    let corners = wallCount + 1;
+
+    qty = (wallCount > 0) ? Math.min(corners, 4) : 0;
+
+}
+else if(row.dataset.formula === "joint"){
+
+    const materialLength = 3.8;
+
+    let totalJoints = 0;
+
+    function calcJoints(wallLength){
+        if(wallLength <= 0) return 0;
+
+        const pieces = Math.ceil(wallLength / materialLength);
+        return Math.max(pieces - 1, 0);
+    }
+
+    if(wallA.checked) totalJoints += calcJoints(width);
+    if(wallB.checked) totalJoints += calcJoints(width);
+    if(wallC.checked) totalJoints += calcJoints(depth);
+    if(wallD.checked) totalJoints += calcJoints(depth);
+
+    qty = totalJoints;
+
+}
             else{
 
                 // ханын материал
