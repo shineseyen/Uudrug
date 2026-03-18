@@ -51,10 +51,37 @@ input[type=number] {
     width: 30px;
 }
 </style>
+<style>
+.fullWidthBtn {
+    width: 100%;
+    padding: 15px 0;
+    font-size: 18px;
+    background-color: #D3D3D3;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.3s;
+    text-align: center;
+}
+
+.fullWidthBtn:hover {
+    transform: scale(1.05);
+}
+
+.fullWidthBtn:active {
+    transform: scale(0.95);
+}
+
+.fullWidthBtn.active {
+    background-color: #4caf50; /* идэвхтэй үед ногоон */
+}
+</style>
 </head>
 <body>
 
 <h2>Барилгын материалын тооцоолуур</h2>
+
 
 <div class="topBox">
 
@@ -115,7 +142,12 @@ input[type=number] {
            </label>
       </div>
 </div>
-
+<hr>
+<div style="margin-top:20px; width:100%; max-width:800px;">
+    <button id="applyDiscountBtn" class="fullWidthBtn">
+        10% Хямдрал оруулах
+    </button>
+</div>
 
 <h3>Хананд хийх ( <span style="color:green;">Хавтан</span> )</h3>
 <table class="itemsTable">
@@ -859,8 +891,44 @@ else if(row.dataset.formula === "joint"){
 
     updateTotal();
 }
+const applyDiscountBtn = document.getElementById('applyDiscountBtn');
+const discountPercent = 10; // тогтмол 10%
 
+let discountApplied = false;
+
+applyDiscountBtn.addEventListener('click', () => {
+    discountApplied = !discountApplied; // toggle
+
+    if(discountApplied){
+        applyDiscountBtn.classList.add('active');
+        applyDiscountBtn.textContent = `${discountPercent}% Хямдрал идэвхжсэн`;
+    } else {
+        applyDiscountBtn.classList.remove('active');
+        applyDiscountBtn.textContent = `${discountPercent}% Хямдрал оруулах`;
+    }
+
+    tables.forEach((table)=>{
+        const rows = table.querySelectorAll('tbody tr');
+        rows.forEach((row)=>{
+            const priceText = row.querySelector('.price').textContent.replace(/[₮,]/g,'');
+            const price = getNumber(priceText);
+            const qty = getNumber(row.querySelector('.qty').textContent);
+
+            let rowTotal = qty * price;
+
+            if(discountApplied){
+                rowTotal = rowTotal * (1 - discountPercent/100);
+            }
+
+            row.querySelector('.rowTotal').textContent = rowTotal.toLocaleString();
+        });
+    });
+
+    updateTotal();
+});
 function updateTotal(){
+
+
 
     let total = 0;
 
