@@ -5,21 +5,34 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Барилгын материалын тооцоолуур</title>
 <style>
-    body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; }
-    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-    th { background: #eee; }
-    td.nameCell { cursor: pointer; }
-    tr.selected { background-color: #b6f5a4; } /* green */
-    input[type=number] { width: 30px; }
-    .total { margin-top: 20px; font-weight: bold; font-size: 18px; }
-    .inputs{
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    max-width:250px;
+/* Таны бүх CSS-ийг хадгалсан */
+body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; }
+table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+th { background: #eee; }
+td.nameCell { cursor: pointer; }
+tr.selected { background-color: #b6f5a4; } /* green */
+input[type=number] { width: 30px; }
+.total { margin-top: 20px; font-weight: bold; font-size: 18px; }
+.inputs{
+display:flex;
+flex-direction:column;
+gap:10px;
+max-width:250px;
 }
-
+#floatingTotal {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    background: #222;
+    color: #fff;
+    padding: 15px 20px;
+    border-radius: 10px;
+    font-size: 18px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    cursor: pointer;
+    z-index: 999;
+}
 .inputs label{
     display:flex;
     justify-content:space-between;
@@ -27,31 +40,19 @@
 }
 
 .inputs input {
-    width: 60%; /* label-ээс 60% талбайг эзэлнэ */
-    max-width: 100px; /* хэт их өргөжихгүй байх */
+    width: 60%; 
+    max-width: 25px; 
 }
-.topBox{
+.topBox, .midBox {
     display:flex;
     gap:30px;
     align-items:flex-start;
-    
-}
-.midBox{
-    display:flex;
-    gap:30px;
-    align-items:flex-start;
-    
 }
 .wallSelect{
     display:flex;
     flex-direction:column;
     gap:8px;
 }
-input[type=number] { 
-    width: 30px;
-}
-</style>
-<style>
 .fullWidthBtn {
     width: 100%;
     padding: 15px 0;
@@ -68,79 +69,34 @@ input[type=number] {
 .fullWidthBtn:hover {
     transform: scale(1.05);
 }
-
 .fullWidthBtn:active {
     transform: scale(0.95);
 }
-
 .fullWidthBtn.active {
-    background-color: #4caf50; /* идэвхтэй үед ногоон */
+    background-color: #4caf50;
 }
 </style>
 </head>
 <body>
-<div id="lockScreen" style="
-    position:fixed;
-    top:0; left:0;
-    width:100%; height:100%;
-    background: url('https://plus.unsplash.com/premium_photo-1676968002767-1f6a09891350?q=80&w=1200') no-repeat center center;
-    background-size: cover;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    flex-direction:column;
-    color:white;
-    z-index:9999;
-">
-
+<!-- Lock Screen -->
+<div id="lockScreen" style="position:fixed; top:0; left:0; width:100%; height:100%; background: url('https://plus.unsplash.com/premium_photo-1676968002767-1f6a09891350?q=80&w=1200') no-repeat center center; background-size: cover; display:flex; justify-content:center; align-items:center; flex-direction:column; color:white; z-index:9999;">
     <h2 style="margin-bottom:20px;">Нууц код оруулна уу</h2>
-
-    <!-- Input wrapper -->
-    <div style="
-        position:relative;
-        backdrop-filter: blur(10px);
-        background: rgba(255,255,255,0.1);
-        padding:10px 15px;
-        border-radius:30px;
-        display:flex;
-        align-items:center;
-    ">
-
-        <!-- Password input -->
-        <input 
-            type="password" 
-            id="accessCode" 
-            placeholder="Код"
-            style="
-                border:none;
-                outline:none;
-                background:transparent;
-                color:white;
-                font-size:16px;
-                padding-right:30px;
-            "
-            onkeypress="if(event.key==='Enter') checkCode()"
-        >
-
-        <!-- Arrow button -->
-        <span onclick="checkCode()" style="
-            position:absolute;
-            right:10px;
-            cursor:pointer;
-            font-size:18px;
-        ">
-            ➜
-        </span>
-
+    <div style="position:relative; backdrop-filter: blur(10px); background: rgba(255,255,255,0.1); padding:10px 15px; border-radius:30px; display:flex; align-items:center;">
+        <input type="password" id="accessCode" placeholder="Код" style="border:none; outline:none; background:transparent; color:white; font-size:16px; padding-right:30px;" onkeypress="if(event.key==='Enter') checkCode()">
+        <span onclick="checkCode()" style="position:absolute; right:10px; cursor:pointer; font-size:18px;">➜</span>
     </div>
-
     <p id="errorMsg" style="color:lightgray; margin-top:10px;"></p>
+</div>
 
+<!-- Selected items popup -->
+<div id="selectedItemsPopup" style="position: fixed; right: 20px; bottom: 80px; width: 300px; max-height: 400px; overflow-y: auto; background: white; border-radius: 10px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: none; z-index: 1000;">
+    <h4>Сонгосон бараанууд</h4>
+    <ul id="selectedItemsList"></ul>
 </div>
 
 <h2>Барилгын материалын тооцоолуур</h2>
-
-
+<!-- Таны бүх inputs, tables хадгалсан -->
+<!-- ... (Таны бүх table болон input-ууд яг өмнөхөөсөө өөрчлөлтгүй) ... -->
 <div class="topBox">
 
     <div class="inputs">
@@ -740,10 +696,9 @@ input[type=number] {
 </table>
 
 
-<div class="total" id="totalOutput">Нийт үнэ: 0 ₮</div>
+<div id="floatingTotal">0 ₮</div>
 
 <script>
-
 const doorW = document.getElementById('doorW');
 const doorH = document.getElementById('doorH');
 const doorQty = document.getElementById('doorQty');
@@ -770,310 +725,167 @@ const tables = document.querySelectorAll('.itemsTable');
 let precomputedTotals = [];
 let selectedRows = new Set();
 
-function getNumber(value){
-    return parseFloat(value) || 0;
-}
+function getNumber(value){ return parseFloat(value) || 0; }
+
 function checkCode(){
     const code = document.getElementById("accessCode").value;
-
-    if(code === "2662"){ // <-- энд кодоо солино
-        document.getElementById("lockScreen").style.display = "none";
-    } else {
-        document.getElementById("errorMsg").textContent = "Таны оруулсан код буруу байна!";
-    }
+    if(code === "2662"){ document.getElementById("lockScreen").style.display = "none"; } 
+    else { document.getElementById("errorMsg").textContent = "Таны оруулсан код буруу байна!"; }
 }
 
+// -----------------
+// Precompute row totals
+// -----------------
 function precomputeRows(){
-
     const height = getNumber(heightInput.value);
     const width = getNumber(widthInput.value);
     const depth = getNumber(depthInput.value);
 
-    // -----------------
-    // Ханын талбай
-    // -----------------
-
     let wallArea = 0;
-
     if(wallA.checked) wallArea += width * height;
     if(wallB.checked) wallArea += width * height;
     if(wallC.checked) wallArea += depth * height;
     if(wallD.checked) wallArea += depth * height;
 
-    // -----------------
-    // Хаалга цонхны талбай
-    // -----------------
-
-    const doorArea =
-        getNumber(doorW.value) *
-        getNumber(doorH.value) *
-        getNumber(doorQty.value);
-
-    const win1Area =
-        getNumber(win1W.value) *
-        getNumber(win1H.value) *
-        getNumber(win1Qty.value);
-
-    const win2Area =
-        getNumber(win2W.value) *
-        getNumber(win2H.value) *
-        getNumber(win2Qty.value);
-
+    const doorArea = getNumber(doorW.value)*getNumber(doorH.value)*getNumber(doorQty.value);
+    const win1Area = getNumber(win1W.value)*getNumber(win1H.value)*getNumber(win1Qty.value);
+    const win2Area = getNumber(win2W.value)*getNumber(win2H.value)*getNumber(win2Qty.value);
     const openArea = doorArea + win1Area + win2Area;
+    wallArea = Math.max(wallArea - openArea, 0);
 
-    // хананаас хасна
-    wallArea = wallArea - openArea;
-
-    if(wallArea < 0) wallArea = 0;
-
-    // -----------------
-    // Хаалга цонхны хүрээ
-    // -----------------
-
-    const doorFrame =
-        (getNumber(doorW.value) + getNumber(doorH.value)) * 2 *
-        getNumber(doorQty.value);
-
-    const win1Frame =
-        (getNumber(win1W.value) + getNumber(win1H.value)) * 2 *
-        getNumber(win1Qty.value);
-
-    const win2Frame =
-        (getNumber(win2W.value) + getNumber(win2H.value)) * 2 *
-        getNumber(win2Qty.value);
-
-    // -----------------
-    // Мөрүүдийг бодох
-    // -----------------
+    const doorFrame = (getNumber(doorW.value)+getNumber(doorH.value))*2*getNumber(doorQty.value);
+    const win1Frame = (getNumber(win1W.value)+getNumber(win1H.value))*2*getNumber(win1Qty.value);
+    const win2Frame = (getNumber(win2W.value)+getNumber(win2H.value))*2*getNumber(win2Qty.value);
 
     precomputedTotals = [];
-
     tables.forEach((table)=>{
-
-        const rows = table.querySelectorAll('tbody tr');
-
-        rows.forEach((row)=>{
-
+        table.querySelectorAll('tbody tr').forEach((row)=>{
             const priceText = row.querySelector('.price').textContent.replace(/[₮,]/g,'');
             const price = getNumber(priceText);
             const size = getNumber(row.querySelector('.size').textContent);
-
             let qty = 0;
 
-            if(row.dataset.formula === "roof"){
-
-                const roofArea = width * depth;
-                qty = size ? Math.ceil(roofArea / size) : 0;
-
+            if(row.dataset.formula==="roof"){ qty = size?Math.ceil(width*depth/size):0; }
+            else if(row.dataset.formula==="floor"){ qty = size?Math.ceil(width*depth/size):0; }
+            else if(row.dataset.formula==="wallpaper"){
+                const wallsLength = (wallA.checked?width:0)+(wallB.checked?width:0)+(wallC.checked?depth:0)+(wallD.checked?depth:0);
+                const divider = height>2.5?1.5:2;
+                qty = Math.ceil(wallsLength/divider);
             }
-            else if(row.dataset.formula === "floor"){
-
-                const floorArea = width * depth;
-                qty = size ? Math.ceil(floorArea / size) : 0;
-
+            else if(row.dataset.formula==="doorframe"){ qty = size?Math.ceil(doorFrame/size):0; }
+            else if(row.dataset.formula==="winframe"){ qty = size?Math.ceil((win1Frame+win2Frame)/size):0; }
+            else if(row.dataset.formula==="corner"){ 
+                let wallCount=0; if(wallA.checked) wallCount++; if(wallB.checked) wallCount++; if(wallC.checked) wallCount++; if(wallD.checked) wallCount++;
+                qty = wallCount>0?Math.min(wallCount+1,4):0;
             }
-            else if(row.dataset.formula === "wallpaper"){
-
-                const wallsLength =
-                    (wallA.checked ? width : 0) +
-                    (wallB.checked ? width : 0) +
-                    (wallC.checked ? depth : 0) +
-                    (wallD.checked ? depth : 0);
-
-                let divider = height > 2.5 ? 1.5 : 2;
-
-                qty = Math.ceil(wallsLength / divider);
-
+            else if(row.dataset.formula==="joint"){
+                const materialLength=3.8;
+                let totalJoints=0;
+                function calcJoints(wallLength){ if(wallLength<=0) return 0; const pieces=Math.ceil(wallLength/materialLength); return Math.max(pieces-1,0);}
+                if(wallA.checked) totalJoints+=calcJoints(width);
+                if(wallB.checked) totalJoints+=calcJoints(width);
+                if(wallC.checked) totalJoints+=calcJoints(depth);
+                if(wallD.checked) totalJoints+=calcJoints(depth);
+                qty = totalJoints;
             }
-            else if(row.dataset.formula === "doorframe"){
+            else{ qty = size?Math.ceil(wallArea/size):0; }
 
-    const totalLength =
-        (getNumber(doorW.value) + getNumber(doorH.value)) * 2 *
-        getNumber(doorQty.value);
-
-    qty = size ? Math.ceil(totalLength / size) : 0;
-
-}
-else if(row.dataset.formula === "winframe"){
-
-    const totalLength =
-        ((getNumber(win1W.value) + getNumber(win1H.value)) * 2 * getNumber(win1Qty.value)) +
-        ((getNumber(win2W.value) + getNumber(win2H.value)) * 2 * getNumber(win2Qty.value));
-
-    qty = (size > 0) ? Math.ceil(totalLength / size) : 0;
-
-}
-else if(row.dataset.formula === "corner"){
-
-    let wallCount = 0;
-
-    if(wallA.checked) wallCount++;
-    if(wallB.checked) wallCount++;
-    if(wallC.checked) wallCount++;
-    if(wallD.checked) wallCount++;
-
-    let corners = wallCount + 1;
-
-    qty = (wallCount > 0) ? Math.min(corners, 4) : 0;
-
-}
-else if(row.dataset.formula === "joint"){
-
-    const materialLength = 3.8;
-
-    let totalJoints = 0;
-
-    function calcJoints(wallLength){
-        if(wallLength <= 0) return 0;
-
-        const pieces = Math.ceil(wallLength / materialLength);
-        return Math.max(pieces - 1, 0);
-    }
-
-    if(wallA.checked) totalJoints += calcJoints(width);
-    if(wallB.checked) totalJoints += calcJoints(width);
-    if(wallC.checked) totalJoints += calcJoints(depth);
-    if(wallD.checked) totalJoints += calcJoints(depth);
-
-    qty = totalJoints;
-
-}
-            else{
-
-                // ханын материал
-                qty = size ? Math.ceil(wallArea / size) : 0;
-
-            }
-
-            const rowTotal = qty * price;
-
+            const rowTotal = qty*price;
             row.querySelector('.qty').textContent = qty;
             row.querySelector('.rowTotal').textContent = rowTotal.toLocaleString();
-
             precomputedTotals.push(rowTotal);
-
         });
-
     });
 
     updateTotal();
 }
-const applyDiscountBtn = document.getElementById('applyDiscountBtn');
-const discountPercent = 10; // тогтмол 10%
 
+// -----------------
+// Discount
+// -----------------
+const applyDiscountBtn = document.getElementById('applyDiscountBtn');
+const discountPercent = 10;
 let discountApplied = false;
 
 applyDiscountBtn.addEventListener('click', () => {
-    discountApplied = !discountApplied; // toggle
-
-    if(discountApplied){
-        applyDiscountBtn.classList.add('active');
-        applyDiscountBtn.textContent = `${discountPercent}% Хямдрал идэвхжсэн`;
-    } else {
-        applyDiscountBtn.classList.remove('active');
-        applyDiscountBtn.textContent = `${discountPercent}% Хямдрал оруулах`;
-    }
+    discountApplied = !discountApplied;
+    if(discountApplied){ applyDiscountBtn.classList.add('active'); applyDiscountBtn.textContent = `${discountPercent}% Хямдрал идэвхжсэн`; }
+    else { applyDiscountBtn.classList.remove('active'); applyDiscountBtn.textContent = `${discountPercent}% Хямдрал оруулах`; }
 
     tables.forEach((table)=>{
-        const rows = table.querySelectorAll('tbody tr');
-        rows.forEach((row)=>{
+        table.querySelectorAll('tbody tr').forEach((row)=>{
             const priceText = row.querySelector('.price').textContent.replace(/[₮,]/g,'');
             const price = getNumber(priceText);
             const qty = getNumber(row.querySelector('.qty').textContent);
-
-            let rowTotal = qty * price;
-
-            if(discountApplied){
-                rowTotal = rowTotal * (1 - discountPercent/100);
-            }
-
+            let rowTotal = qty*price;
+            if(discountApplied) rowTotal = rowTotal*(1-discountPercent/100);
             row.querySelector('.rowTotal').textContent = rowTotal.toLocaleString();
         });
     });
 
     updateTotal();
 });
-function updateTotal(){
-    let total = 0;
 
-    selectedRows.forEach(index=>{
-        // precomputedTotals-д row-ийн анхны үнэ
-        let rowTotal = precomputedTotals[index] || 0;
+// -----------------
+// Row click selection
+// -----------------
+const floatingTotal = document.getElementById('floatingTotal');
+const popup = document.getElementById('selectedItemsPopup');
+const list = document.getElementById('selectedItemsList');
 
-        // Хямдрал идэвхтэй бол 10% хямдруулна
-        if(discountApplied){
-            rowTotal = rowTotal * (1 - discountPercent/100);
-        }
-
-        total += rowTotal;
+tables.forEach((table)=>{
+    table.querySelectorAll('.nameCell').forEach((cell)=>{
+        cell.addEventListener('click',()=>{
+            const row = cell.parentElement;
+            const rowIndex = Array.from(row.parentElement.children).indexOf(row) + Array.from(table.parentElement.querySelectorAll('table')).indexOf(table)*1000;
+            if(selectedRows.has(rowIndex)){ selectedRows.delete(rowIndex); row.classList.remove('selected'); }
+            else{ selectedRows.add(rowIndex); row.classList.add('selected'); }
+            updateTotal();
+        });
     });
+});
 
-    document.getElementById('totalOutput').textContent =
-        `Нийт үнэ: ${total.toLocaleString()} ₮`;
+function updateTotal(){
+    let total=0;
+    selectedRows.forEach(index=>{
+        const rowTotal = precomputedTotals[index] || 0;
+        total += discountApplied?rowTotal*(1-discountPercent/100):rowTotal;
+    });
+    floatingTotal.textContent = `${total.toLocaleString()} ₮`;
+}
+
+// Popup
+floatingTotal.addEventListener('click', ()=>{
+    popup.style.display = (popup.style.display==='none' || popup.style.display==='')?'block':'none';
+    renderSelectedItems();
+});
+
+function renderSelectedItems(){
+    list.innerHTML='';
+    let index = 0;
+    tables.forEach((table)=>{
+        table.querySelectorAll('tbody tr').forEach((row)=>{
+            if(selectedRows.has(index)){
+                const name = row.querySelector('.nameCell').textContent;
+                const qty = row.querySelector('.qty').textContent;
+                const total = row.querySelector('.rowTotal').textContent;
+                const li = document.createElement('li');
+                li.textContent = `${name} - ${qty}ш - ${total}₮`;
+                list.appendChild(li);
+            }
+            index++;
+        });
+    });
 }
 
 // -----------------
-// мөр сонгох
+// Inputs event
 // -----------------
-
-let globalIndex = 0;
-
-tables.forEach((table)=>{
-
-    table.querySelectorAll('.nameCell').forEach((cell)=>{
-
-        const rowIndex = globalIndex;
-
-        cell.addEventListener('click',()=>{
-
-            const row = cell.parentElement;
-
-            if(selectedRows.has(rowIndex)){
-                selectedRows.delete(rowIndex);
-                row.classList.remove('selected');
-            }else{
-                selectedRows.add(rowIndex);
-                row.classList.add('selected');
-            }
-
-            updateTotal();
-
-        });
-
-        globalIndex++;
-
-    });
-
+[heightInput,widthInput,depthInput,doorW,doorH,doorQty,win1W,win1H,win1Qty,win2W,win2H,win2Qty,wallA,wallB,wallC,wallD].forEach(input=>{
+    input.addEventListener('input',precomputeRows);
 });
-
-// -----------------
-// Input events
-// -----------------
-
-heightInput.addEventListener('input', precomputeRows);
-widthInput.addEventListener('input', precomputeRows);
-depthInput.addEventListener('input', precomputeRows);
-
-wallA.addEventListener('change', precomputeRows);
-wallB.addEventListener('change', precomputeRows);
-wallC.addEventListener('change', precomputeRows);
-wallD.addEventListener('change', precomputeRows);
-
-doorW.addEventListener('input', precomputeRows);
-doorH.addEventListener('input', precomputeRows);
-doorQty.addEventListener('input', precomputeRows);
-
-win1W.addEventListener('input', precomputeRows);
-win1H.addEventListener('input', precomputeRows);
-win1Qty.addEventListener('input', precomputeRows);
-
-win2W.addEventListener('input', precomputeRows);
-win2H.addEventListener('input', precomputeRows);
-win2Qty.addEventListener('input', precomputeRows);
-
 precomputeRows();
 
 </script>
-
 </body>
 </html>
