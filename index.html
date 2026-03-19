@@ -834,12 +834,27 @@ const popup = document.getElementById('selectedItemsPopup');
 const list = document.getElementById('selectedItemsList');
 
 tables.forEach((table)=>{
-    table.querySelectorAll('.nameCell').forEach((cell)=>{
+    table.querySelectorAll('.nameCell').forEach((cell, i)=>{
         cell.addEventListener('click',()=>{
             const row = cell.parentElement;
-            const rowIndex = Array.from(row.parentElement.children).indexOf(row) + Array.from(table.parentElement.querySelectorAll('table')).indexOf(table)*1000;
-            if(selectedRows.has(rowIndex)){ selectedRows.delete(rowIndex); row.classList.remove('selected'); }
-            else{ selectedRows.add(rowIndex); row.classList.add('selected'); }
+
+            // Global row index across all tables
+            let globalIndex = 0;
+            for(const t of tables){
+                if(t === table){
+                    globalIndex += i; 
+                    break;
+                }
+                globalIndex += t.querySelectorAll('tbody tr').length;
+            }
+
+            if(selectedRows.has(globalIndex)){
+                selectedRows.delete(globalIndex);
+                row.classList.remove('selected');
+            } else {
+                selectedRows.add(globalIndex);
+                row.classList.add('selected');
+            }
             updateTotal();
         });
     });
